@@ -1,0 +1,53 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-primary-100: #D3E5E6;
+    --color-primary-200: #A7CBCC;
+    --color-primary-300: #7BB1B3;
+    --color-primary-400: #4E878A;
+    --color-primary-500: #215E61;
+    --color-primary-600: #1A4B4E;
+    --color-primary-700: #14383A;
+    --color-primary-800: #0D2527;
+    --color-primary-900: #071313;
+
+    --color-secondary-100: #FFF2E6;
+    --color-secondary-200: #FFE5CC;
+    --color-secondary-300: #FFC094;
+    --color-secondary-400: #FF9F61;
+    --color-secondary-500: #FE7F2D;
+    --color-secondary-600: #CB6624;
+    --color-secondary-700: #984C1B;
+    --color-secondary-800: #663312;
+    --color-secondary-900: #331909;
+
+    --color-tertiary-100: #D3D8DB;
+    --color-tertiary-200: #A7B1B8;
+    --color-tertiary-300: #7C8994;
+    --color-tertiary-400: #4F6371;
+    --color-tertiary-500: #233D4D;
+    --color-tertiary-600: #1C313E;
+    --color-tertiary-700: #15252E;
+    --color-tertiary-800: #0E181F;
+    --color-tertiary-900: #070C0F;
+
+    --color-primary-light-100: #FEFFF9;
+    --color-primary-light-200: #FDFFF2;
+    --color-primary-light-300: #FBFFE6;
+    --color-primary-light-400: #F8FDEE;
+    --color-primary-light-500: #F5FBE6;
+    --color-primary-light-600: #C4C9B8;
+    --color-primary-light-700: #93978A;
+    --color-primary-light-800: #62645C;
+    --color-primary-light-900: #31322E;
+
+    color-scheme: light dark;
+  }
+
+  body {
+    @apply bg-tertiary-100 text-primary-900 dark:bg-primary-950 dark:text-tertiary-100;
+  }
+}
