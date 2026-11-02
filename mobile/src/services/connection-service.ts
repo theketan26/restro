@@ -22,7 +22,7 @@ export async function connectToDevice(device: DiscoveredDevice): Promise<Discove
       headers['Cookie'] = `jwt=${token}`;
     }
 
-    await httpClient.post(`${device.base_url}${CONNECT_ENDPOINT}`, {
+    const response = await httpClient.post(`${device.base_url}${CONNECT_ENDPOINT}`, {
       mobile: {
         id: mobileInfo.id,
         name: mobileInfo.name,
@@ -34,8 +34,16 @@ export async function connectToDevice(device: DiscoveredDevice): Promise<Discove
       },
     }, { headers });
 
-    await saveConnectedDevice(device);
-    return device;
+    const responseData = response.data?.data;
+    const updatedDevice: DiscoveredDevice = {
+      ...device,
+      user_name: responseData?.user_name || device.user_name,
+      user_email: responseData?.user_email || device.user_email,
+      user_role: responseData?.user_role || device.user_role,
+    };
+
+    await saveConnectedDevice(updatedDevice);
+    return updatedDevice;
   } catch (error) {
     console.error('Error connecting to device:', error);
     return null;
@@ -91,10 +99,30 @@ export async function getConnectedDevice(): Promise<DiscoveredDevice | null> {
   return loadConnectedDevice();
 }
 
+export async function verifyStillConnected(device: DiscoveredDevice): Promise<boolean> {
+  if (device.id === 'mock-device' || device.base_url?.startsWith('mock://')) {
+    return true;
+  }
+  try {
+    const mobileInfo = await getMobileDeviceInfo();
+    const resp = await httpClient.get(`${device.base_url}/api/device/connected`, {
+      timeout: 3000,
+    });
+    const payload = resp?.data;
+    if (payload?.success && Array.isArray(payload?.data)) {
+      return payload.data.some((d: any) => d.id === mobileInfo.id);
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
+
 // Create an authentication request on the desktop (user must approve)
 export async function createAuthRequest(device: DiscoveredDevice, email: string): Promise<string | null> {
   try {
     const mobileInfo = await getMobileDeviceInfo();
+    const cleanEmail = email.trim().toLowerCase();
     const resp = await httpClient.post(`${device.base_url}/api/device/auth-request`, {
       mobile: {
         id: mobileInfo.id,
@@ -105,7 +133,7 @@ export async function createAuthRequest(device: DiscoveredDevice, email: string)
         version: mobileInfo.version,
         last_seen: new Date().toISOString(),
       },
-      email,
+      email: cleanEmail,
     }, {
       timeout: 10000,
     });

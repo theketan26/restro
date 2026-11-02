@@ -4,6 +4,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
+  password?: string;
   role: UserRoles;
   active: boolean;
   createdAt: number;
@@ -11,7 +12,7 @@ export interface User {
   syncedAt?: number;
 }
 
-export type CreateUserInput = Pick<User, "name" | "email" | "role" | "active">;
-export type UpdateUserInput = Partial<Pick<User, "name" | "email" | "role" | "active">> & {
+export type CreateUserInput = Pick<User, "name" | "email" | "role" | "active"> & { password?: string };
+export type UpdateUserInput = Partial<Pick<User, "name" | "email" | "role" | "active" | "password">> & {
   id: string;
 };

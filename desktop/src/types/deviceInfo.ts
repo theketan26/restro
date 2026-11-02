@@ -6,4 +6,6 @@ export interface DeviceInfo {
   ip_address: string;
   port: number;
   version: string;
+  user_name?: string;
+  user_email?: string;
 }

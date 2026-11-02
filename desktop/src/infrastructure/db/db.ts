@@ -9,7 +9,7 @@ export class AppDatabase extends Dexie {
   items!: Table<Item, string>;
   orders!: Table<Order, string>;
   orderTokens!: Table<OrderToken, string>;
-  tables!: Table<RestaurantTable, string>;
+  restaurantTables!: Table<RestaurantTable, string>;
 
   constructor() {
     super("AppDatabase");
@@ -25,4 +25,18 @@ export class AppDatabase extends Dexie {
 }
 
 export const db = new AppDatabase();
+
+export async function clearAllLocalData(): Promise<void> {
+  try {
+    await Promise.all([
+      db.users.clear(),
+      db.items.clear(),
+      db.orders.clear(),
+      db.orderTokens.clear(),
+      db.table("tables").clear(),
+    ]);
+  } catch (err) {
+    console.warn("Error clearing local Dexie tables:", err);
+  }
+}
 

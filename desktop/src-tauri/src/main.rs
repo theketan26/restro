@@ -3,6 +3,7 @@
 mod server;
 mod device;
 mod mdns_service;
+mod domains;
 
 use server::start_http_server;
 

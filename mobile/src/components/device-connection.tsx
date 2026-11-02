@@ -9,9 +9,13 @@ import {
   TextInput,
   Alert,
 } from 'react-native';
+import { useRouter } from 'expo-router';
 import Modal from './Modal';
 import { useDeviceConnection } from '../hooks/use-device-connection';
 import { DiscoveredDevice } from '../services/device-discovery';
+
+import { useTheme } from '../hooks/use-theme';
+import { AnimatedSymbol } from './ui/animated-symbol';
 
 function DeviceItem({
   device,
@@ -22,20 +26,23 @@ function DeviceItem({
   connected: boolean;
   onSelect: (device: DiscoveredDevice) => void;
 }) {
+  const theme = useTheme();
+
   return (
     <TouchableOpacity
       style={[
         styles.deviceItem,
-        connected && styles.connectedDeviceItem,
+        { backgroundColor: theme.card, borderColor: theme.border },
+        connected && { borderColor: theme.primaryTeal, backgroundColor: theme.backgroundElement },
       ]}
       onPress={() => onSelect(device)}
     >
       <View style={styles.deviceContent}>
-        <Text style={styles.deviceName}>{device.master_name || device.name}</Text>
-        <Text style={styles.deviceInfo}>{device.ip_address}</Text>
-        <Text style={styles.deviceType}>{device.device_type}</Text>
+        <Text style={[styles.deviceName, { color: theme.text }]}>{device.master_name || device.name}</Text>
+        <Text style={[styles.deviceInfo, { color: theme.textSecondary }]}>{device.ip_address}</Text>
+        <Text style={[styles.deviceType, { color: theme.textSecondary }]}>{device.device_type}</Text>
       </View>
-      <View style={styles.deviceBadge}>
+      <View style={[styles.deviceBadge, { backgroundColor: theme.secondary }]}>
         <Text style={styles.deviceBadgeText}>{connected ? 'Connected' : 'Connect'}</Text>
       </View>
     </TouchableOpacity>
@@ -43,6 +50,8 @@ function DeviceItem({
 }
 
 export function DeviceConnection() {
+  const router = useRouter();
+  const theme = useTheme();
   const {
     devices,
     connectedDevice,
@@ -116,11 +125,22 @@ export function DeviceConnection() {
   const connectedDeviceId = useMemo(() => connectedDevice?.id, [connectedDevice]);
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
       <View style={styles.header}>
-        <Text style={styles.title}>Available Devices</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <Text style={[styles.title, { color: theme.text }]}>Available Devices</Text>
+          {isScanning && (
+            <AnimatedSymbol
+              name="antenna.radiowaves.left.and.right"
+              fallbackName="radio-outline"
+              size={20}
+              tintColor={theme.primaryTeal}
+              animationSpec={{ effect: { type: 'pulse' }, repeating: true }}
+            />
+          )}
+        </View>
         <TouchableOpacity
-          style={styles.scanButton}
+          style={[styles.scanButton, { backgroundColor: theme.primary }]}
           onPress={scanDevices}
           disabled={isScanning}
         >
@@ -133,42 +153,62 @@ export function DeviceConnection() {
       </View>
 
       {connectedDevice ? (
-        <View style={styles.connectedCard}>
-          <Text style={styles.connectedTitle}>Connected to</Text>
-          <Text style={styles.connectedName}>{connectedDevice.master_name || connectedDevice.name}</Text>
-          <Text style={styles.connectedInfo}>{connectedDevice.ip_address}</Text>
-          <TouchableOpacity style={styles.disconnectButton} onPress={handleDisconnect}>
-            <Text style={styles.disconnectButtonText}>Disconnect</Text>
-          </TouchableOpacity>
+        <View style={[styles.connectedCard, { backgroundColor: theme.card, borderColor: theme.border, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }]}>
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.connectedTitle, { color: theme.textSecondary }]}>Connected to</Text>
+            <Text style={[styles.connectedName, { color: theme.text }]}>{connectedDevice.master_name || connectedDevice.name}</Text>
+            <Text style={[styles.connectedInfo, { color: theme.textSecondary }]}>{connectedDevice.ip_address}</Text>
+            <TouchableOpacity style={styles.disconnectButton} onPress={handleDisconnect}>
+              <Text style={styles.disconnectButtonText}>Disconnect</Text>
+            </TouchableOpacity>
+          </View>
+          <AnimatedSymbol
+            name="bolt.horizontal.circle.fill"
+            fallbackName="link"
+            size={48}
+            tintColor="#10B981"
+            animationSpec={{ effect: { type: 'bounce' } }}
+            style={{ marginLeft: 16 }}
+          />
         </View>
       ) : (
-        <View style={styles.connectedCardEmpty}>
-          <Text style={styles.connectedTitle}>No device connected</Text>
-          <Text style={styles.connectedInfo}>Select a device to connect.</Text>
+        <View style={[styles.connectedCardEmpty, { backgroundColor: theme.card, borderColor: theme.border, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }]}>
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.connectedTitle, { color: theme.textSecondary }]}>No device connected</Text>
+            <Text style={[styles.connectedInfo, { color: theme.textSecondary, marginBottom: 0 }]}>Select a device to connect.</Text>
+          </View>
+          <AnimatedSymbol
+            name="bolt.horizontal.circle"
+            fallbackName="link-outline"
+            size={48}
+            tintColor="#EF4444"
+            style={{ marginLeft: 16 }}
+          />
         </View>
       )}
 
       <Modal visible={showEmailModal} onRequestClose={() => { setShowEmailModal(false); setSelectedForAuth(null); }}>
-        <Text style={{ fontSize: 18, fontWeight: '700', marginBottom: 8 }}>Authenticate</Text>
-        <Text style={{ marginBottom: 12 }}>Enter the email registered on the desktop to request access.</Text>
+        <Text style={{ fontSize: 18, fontWeight: '700', color: '#071313', marginBottom: 8 }}>Authenticate</Text>
+        <Text style={{ fontSize: 13, color: '#4F6371', marginBottom: 12 }}>Enter the email registered on the desktop to request access.</Text>
         <TextInput
           value={email}
           onChangeText={setEmail}
           placeholder="you@example.com"
+          placeholderTextColor="#7C8994"
           keyboardType="email-address"
-          style={{ borderWidth: 1, borderColor: '#ddd', padding: 10, borderRadius: 8, marginBottom: 12 }}
+          style={{ borderWidth: 1, borderColor: '#D3D4C0', padding: 10, borderRadius: 8, marginBottom: 12, color: '#071313' }}
         />
         {modalError ? (
-          <View style={{ backgroundColor: '#fee2e2', padding: 10, borderRadius: 8, marginBottom: 12 }}>
-            <Text style={{ color: '#991b1b' }}>{modalError}</Text>
+          <View style={{ backgroundColor: '#FEE2E2', padding: 10, borderRadius: 8, marginBottom: 12 }}>
+            <Text style={{ color: '#991B1B' }}>{modalError}</Text>
           </View>
         ) : null}
         <View style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: 8 }}>
           <TouchableOpacity onPress={() => { setShowEmailModal(false); setSelectedForAuth(null); setModalError(null); }} style={{ padding: 10 }}>
-            <Text>Cancel</Text>
+            <Text style={{ color: '#4F6371', fontWeight: '600' }}>Cancel</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={submitAuthRequest} style={{ backgroundColor: '#007AFF', padding: 10, borderRadius: 8 }}>
-            {isRequesting ? <ActivityIndicator color="#fff" /> : <Text style={{ color: '#fff' }}>Request</Text>}
+          <TouchableOpacity onPress={submitAuthRequest} style={{ backgroundColor: '#0A2947', paddingVertical: 10, paddingHorizontal: 18, borderRadius: 8 }}>
+            {isRequesting ? <ActivityIndicator color="#fff" /> : <Text style={{ color: '#fff', fontWeight: '700' }}>Request</Text>}
           </TouchableOpacity>
         </View>
       </Modal>
@@ -183,11 +223,12 @@ export function DeviceConnection() {
         <TextInput
           value={manualIp}
           onChangeText={setManualIp}
-          placeholder="Add device IP"
-          style={styles.manualInput}
+          placeholder="Add device IP address"
+          placeholderTextColor={theme.textSecondary}
+          style={[styles.manualInput, { backgroundColor: theme.card, borderColor: theme.border, color: theme.text }]}
           keyboardType="decimal-pad"
         />
-        <TouchableOpacity style={styles.addButton} onPress={handleAddDevice}>
+        <TouchableOpacity style={[styles.addButton, { backgroundColor: theme.primaryTeal }]} onPress={handleAddDevice}>
           <Text style={styles.addButtonText}>Add</Text>
         </TouchableOpacity>
       </View>
@@ -206,7 +247,7 @@ export function DeviceConnection() {
         ListEmptyComponent={
           !isScanning ? (
             <View style={styles.emptyState}>
-              <Text style={styles.emptyText}>No devices found yet.</Text>
+              <Text style={[styles.emptyText, { color: theme.textSecondary }]}>No devices found on local network.</Text>
             </View>
           ) : null
         }
@@ -218,7 +259,7 @@ export function DeviceConnection() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#FAF3E5',
     padding: 16,
   },
   header: {
@@ -230,10 +271,10 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#111',
+    color: '#071313',
   },
   scanButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#0A2947',
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 12,
@@ -243,38 +284,38 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   connectedCard: {
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     borderRadius: 20,
     padding: 16,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: '#e5e7eb',
+    borderColor: '#D3D4C0',
   },
   connectedCardEmpty: {
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     borderRadius: 20,
     padding: 16,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: '#e5e7eb',
+    borderColor: '#D3D4C0',
   },
   connectedTitle: {
     fontSize: 14,
-    color: '#6b7280',
+    color: '#4F6371',
     marginBottom: 8,
   },
   connectedName: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#111',
+    color: '#071313',
   },
   connectedInfo: {
     fontSize: 14,
-    color: '#6b7280',
+    color: '#4F6371',
     marginBottom: 12,
   },
   disconnectButton: {
-    backgroundColor: '#ef4444',
+    backgroundColor: '#DC2626',
     borderRadius: 12,
     paddingVertical: 10,
     alignItems: 'center',
@@ -284,13 +325,13 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   errorBanner: {
-    backgroundColor: '#fee2e2',
+    backgroundColor: '#FEE2E2',
     padding: 12,
     borderRadius: 16,
     marginBottom: 16,
   },
   errorText: {
-    color: '#991b1b',
+    color: '#991B1B',
   },
   manualContainer: {
     flexDirection: 'row',
@@ -299,17 +340,18 @@ const styles = StyleSheet.create({
   },
   manualInput: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     borderRadius: 14,
     paddingHorizontal: 14,
     paddingVertical: 12,
     borderWidth: 1,
-    borderColor: '#d1d5db',
+    borderColor: '#D3D4C0',
+    color: '#071313',
   },
   addButton: {
-    backgroundColor: '#10b981',
+    backgroundColor: '#215E61',
     borderRadius: 14,
-    paddingHorizontal: 16,
+    paddingHorizontal: 18,
     justifyContent: 'center',
   },
   addButtonText: {
@@ -321,17 +363,17 @@ const styles = StyleSheet.create({
   },
   deviceItem: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     borderRadius: 18,
     padding: 16,
     alignItems: 'center',
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#e5e7eb',
+    borderColor: '#D3D4C0',
   },
   connectedDeviceItem: {
-    borderColor: '#10b981',
-    backgroundColor: '#ecfdf5',
+    borderColor: '#215E61',
+    backgroundColor: '#E9EDF1',
   },
   deviceContent: {
     flex: 1,
@@ -339,19 +381,19 @@ const styles = StyleSheet.create({
   deviceName: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#111',
+    color: '#071313',
   },
   deviceInfo: {
-    color: '#6b7280',
+    color: '#4F6371',
     marginTop: 4,
   },
   deviceType: {
-    color: '#9ca3af',
+    color: '#7C8994',
     marginTop: 4,
     fontSize: 12,
   },
   deviceBadge: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#FE7F2D',
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 999,
@@ -367,6 +409,6 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   emptyText: {
-    color: '#6b7280',
+    color: '#4F6371',
   },
 });

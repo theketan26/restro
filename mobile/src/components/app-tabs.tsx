@@ -1,30 +1,45 @@
-import { NativeTabs } from 'expo-router/unstable-native-tabs';
-import { useColorScheme } from 'react-native';
-
+import { NativeTabs, Label, Icon } from 'expo-router/unstable-native-tabs';
+import { Slot } from 'expo-router';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
+import { useDeviceConnection } from '@/hooks/use-device-connection';
 
 export default function AppTabs() {
   const scheme = useColorScheme();
-  const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
+  const { connectedDevice } = useDeviceConnection();
+  const themeMode = scheme;
+  const colors = Colors[themeMode];
+
+  if (!connectedDevice) {
+    return <Slot />;
+  }
 
   return (
     <NativeTabs
-      backgroundColor={colors.background}
+      backgroundColor={colors.card}
       indicatorColor={colors.backgroundElement}
       labelStyle={{ selected: { color: colors.text } }}>
       <NativeTabs.Trigger name="index">
-        <NativeTabs.Trigger.Label>Home</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon
-          src={require('@/assets/images/tabIcons/home.png')}
-          renderingMode="template"
+        <Label>Home</Label>
+        <Icon
+          sf={{ default: 'house', selected: 'house.fill' }}
+          androidSrc={require('@/assets/images/tabIcons/home.png')}
         />
       </NativeTabs.Trigger>
 
-      <NativeTabs.Trigger name="explore">
-        <NativeTabs.Trigger.Label>Explore</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon
-          src={require('@/assets/images/tabIcons/explore.png')}
-          renderingMode="template"
+      <NativeTabs.Trigger name="account">
+        <Label>Account</Label>
+        <Icon
+          sf={{ default: 'person.crop.circle', selected: 'person.crop.circle.fill' }}
+          androidSrc={require('@/assets/images/tabIcons/home.png')}
+        />
+      </NativeTabs.Trigger>
+
+      <NativeTabs.Trigger name="settings">
+        <Label>Settings</Label>
+        <Icon
+          sf={{ default: 'gearshape', selected: 'gearshape.fill' }}
+          androidSrc={require('@/assets/images/tabIcons/explore.png')}
         />
       </NativeTabs.Trigger>
     </NativeTabs>

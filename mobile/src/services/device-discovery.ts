@@ -10,6 +10,9 @@ export interface DiscoveredDevice {
   port: number;
   version: string;
   base_url: string;
+  user_name?: string;
+  user_email?: string;
+  user_role?: string;
 }
 
 const DISCOVERY_PORT = process.env.EXPO_PUBLIC_API_BASE_PORT?.trim() || '2326';

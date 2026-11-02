@@ -32,6 +32,19 @@ export async function loadConnectedDevice(): Promise<DiscoveredDevice | null> {
   }
 }
 
+export async function updateStoredUserProfile(name: string, email: string): Promise<DiscoveredDevice | null> {
+  const current = await loadConnectedDevice();
+  if (!current) return null;
+
+  const updated: DiscoveredDevice = {
+    ...current,
+    user_name: name,
+    user_email: email,
+  };
+  await saveConnectedDevice(updated);
+  return updated;
+}
+
 export async function cacheAvailableDevices(devices: DiscoveredDevice[]): Promise<void> {
   await AsyncStorage.setItem(DEVICE_CACHE_KEY, JSON.stringify(devices));
 }

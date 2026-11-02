@@ -22,7 +22,13 @@ export default function RootLayout({
       <body className={inter.className}>
         <Providers>
           <Layout>{children}</Layout>
-          <Toaster position="bottom-right" reverseOrder={false} />
+          <Toaster
+            position="bottom-right"
+            reverseOrder={false}
+            toastOptions={{
+              className: "!bg-white !text-neutral-900 dark:!bg-neutral-900 dark:!text-white border border-neutral-200 dark:border-neutral-800 shadow-xl rounded-2xl",
+            }}
+          />
         </Providers>
       </body>
     </html>

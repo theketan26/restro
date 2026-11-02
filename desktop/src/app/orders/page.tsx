@@ -16,6 +16,7 @@ import type { RestaurantTable } from "@/domain/models/table";
 import { showToast } from "@/components/Toast";
 import { BiHistory, BiPlus, BiCoffeeTogo, BiTrash, BiEditAlt } from "react-icons/bi";
 import { useUIStore } from "@/store/ui.store";
+import { useAuthStore } from "@/store/auth.store";
 import { useUpdateOrderTokenChef } from "@/commands/order-token/update-order-token.command";
 import { useUsers } from "@/queries/user/use-users.query";
 import { UserRoles } from "@/types/userRoles";
@@ -42,6 +43,7 @@ export default function OrdersPage() {
   const { data: tables = [], isLoading: tablesLoading } = useTables({ staleTime: 0 });
 
   const { userRole, activeChefId } = useUIStore();
+  const { authUser } = useAuthStore();
   const updateChefMutation = useUpdateOrderTokenChef();
   const { data: chefsData } = useUsers(
     { role: "chef", status: "active" },
@@ -49,7 +51,7 @@ export default function OrdersPage() {
   );
   const chefs = chefsData?.users || [];
   const activeChef = chefs.find((c) => c.id === activeChefId);
-  const currentChefName = activeChef ? activeChef.name : "Chef Gordon";
+  const currentChefName = activeChef ? activeChef.name : (authUser?.name || "Chef");
 
   const deleteTableMutation = useDeleteTable();
 
